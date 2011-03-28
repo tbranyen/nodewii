@@ -102,6 +102,7 @@ Release information
 ### v0.0.1: ###
     * Some useful methods implemented
 
+
 Getting involved
 ----------------
 

@@ -4,8 +4,8 @@ import os
 from os import system
 from os.path import exists, abspath
 
-VERSION = '0.0.2'
-APPNAME = 'nodegit'
+VERSION = '0.0.0'
+APPNAME = 'nodewii'
 srcdir = '.'
 blddir = 'build'
 
@@ -24,5 +24,6 @@ def configure(conf):
 def build(bld):
   main = bld.new_task_gen('cxx', 'shlib', 'node_addon')
   main.target = 'nodewii'
-  main.source = 'src/base.cc src/connect.cc'
-  main.cxxflags = ['-L./vendor/cwiid/libcwiid', '-lcwiid']
+  main.source = 'src/base.cc src/wiimote.cc'
+  main.lib = ['bluetooth','cwiid']
+  main.cxxflags = ['-L./vendor/cwiid/libcwiid', '-lcwiid', '-lblueooth']

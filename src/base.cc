@@ -6,12 +6,10 @@ Copyright (c) 2011, Tim Branyen @tbranyen <tim@tabdeveloper.com>
 #include <node.h>
 #include <node_events.h>
 
-#include "../vendor/libgit2/include/git2.h"
-
-#include "../include/connect.h"
+#include "../include/wiimote.h"
 
 extern "C" void init(Handle<v8::Object> target) {
   HandleScope scope;
 
-  Connect::Initialize(target);
+  WiiMote::Initialize(target);
 }

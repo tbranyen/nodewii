@@ -2,7 +2,11 @@ var wii = require( '../build/default/nodewii.node' );
 
 var wiimote = new wii.WiiMote();
 
+
+console.log( 'Put wiimote in discoverable mode...' );
 wiimote.connect( '00:17:AB:39:42:B1', function( err ) {
+  if( err ) { console.log( 'Could not establish connection'); return; }
+
   wiimote.rumble( true );
 
   setTimeout(function() {
@@ -19,7 +23,6 @@ wiimote.connect( '00:17:AB:39:42:B1', function( err ) {
 
     wiimote.led(1, true);
     wiimote.led(3, true);
-    
 
     setTimeout(function() {
       wiimote.led(1, false);
@@ -27,9 +30,19 @@ wiimote.connect( '00:17:AB:39:42:B1', function( err ) {
       
       wiimote.led(2, true);
       wiimote.led(4, true);
-     // console.log( wiimote.led(5, true) );
-      wiimote.rumble( true );
-    }, 1000);
+    }, 50);
 
-  }, 1000);
+  }, 50);
+
+  
+  // Wait for infrared data
+  wiimote.ir( true );
+  wiimote.on( 'ir', function( err, data ) {
+    console.log( arguments );
+  });
+
+  wiimote.on( 'accelerometer', function( err, data ) {
+
+  });
+
 });

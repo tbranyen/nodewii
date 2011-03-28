@@ -22,6 +22,16 @@ using namespace node;
 class WiiMote : public EventEmitter {
   public:
     /**
+     * Variable: ir_event
+     *   Used to dispatch infrared event.
+     */
+    static v8::Persistent<v8::String> ir_event;
+    /**
+     * Variable: acc_event
+     *   Used to dispatch accelerometer event.
+     */
+    static v8::Persistent<v8::String> acc_event;
+    /**
      * Variable: constructor_template
      *   Used to create Node.js constructor.
      */
@@ -44,6 +54,8 @@ class WiiMote : public EventEmitter {
     int Connect(const char* mac);
     int Rumble(bool on);
     int Led(int index, bool on);
+    int IrReporting(bool on);
+    int WatchMessages();
 
   protected:
     /**
@@ -77,8 +89,12 @@ class WiiMote : public EventEmitter {
     static int EIO_Connect(eio_req* req);
     static int EIO_AfterConnect(eio_req* req);
 
+    //static void MsgCallback(cwiid_wiimote_t* wiimote, int msg_count, union cwiid_mesg msg[], struct timespec *timestamp);
+    static void TriggerMessages(EV_P_ ev_timer *watcher, int revents);
+
     static v8::Handle<v8::Value> Rumble(const v8::Arguments& args);
     static v8::Handle<v8::Value> Led(const v8::Arguments& args);
+    static v8::Handle<v8::Value> IrReporting(const v8::Arguments& args);
   private:
     /**
      * Variable: wiimote
@@ -95,6 +111,11 @@ class WiiMote : public EventEmitter {
      *   bluetooth address value
      */
     bdaddr_t mac;
+    /**
+     * Variable: msg_timer
+     *   libev timer struct
+     */
+    ev_timer msg_timer;
 
     struct connect_request {
       WiiMote* wiimote;

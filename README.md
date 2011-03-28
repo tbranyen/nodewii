@@ -9,20 +9,20 @@ Building and installing
 -----------------------
 
 ### Dependancies ###
-To run `nodegit` you need `Node.js` and to run unit tests you will need to have `git` installed and accessible from your `PATH` to fetch any `vendor/` addons.
+To run `nodewii` you need `Node.js`, `bluez`, and `libcwiid` installed. To run unit tests you will need to have `git` installed and accessible from your `PATH` to fetch any `vendor/` addons. 
 
 ### Easy install (Recommended) ###
-This will install and configure everything you need to use `nodegit`.
+This will install and configure everything you need to use `nodewii`.
 
-    $ sudo npm install nodegit
+    $ sudo npm install nodewii
 
 ### Mac OS X/Linux/Unix ###
 
-#### Install `nodegit` by cloning source from __GitHub__ and running the `configure`, `make`, and `make install` commands: ####
-\*Note: `nodegit` assumes your library path exists at `~/.node_libraries` you can change this by specifying a new path\*
+#### Install `nodewii` by cloning source from __GitHub__ and running the `configure`, `make`, and `make install` commands: ####
+\*Note: `nodewii` assumes your library path exists at `~/.node_libraries` you can change this by specifying a new path\*
     
-    $ git clone git://github.com/tbranyen/nodegit.git
-    $ cd nodegit
+    $ git clone git://github.com/tbranyen/nodewii.git
+    $ cd nodewii
 
     $ ./configure
     $ make
@@ -38,7 +38,7 @@ This will install and configure everything you need to use `nodegit`.
 
 ### Windows via Cygwin ###
 
-#### `nodegit` has a build issue under Windows that current makes it impossible to use. ####
+#### `nodewii` installs cleanly using the same build process as above, assuming you followed the `Node.js` Windows instructions. ####
 
 Instructions on compiling `Node.js` on a Windows platform can be found here:
 [https://github.com/ry/node/wiki/Building-node.js-on-Cygwin-(Windows)](https://github.com/ry/node/wiki/Building-node.js-on-Cygwin-(Windows\))
@@ -46,110 +46,51 @@ Instructions on compiling `Node.js` on a Windows platform can be found here:
 API Example Usage
 -----------------
 
-### Git Log Emulation ###
+### Connecting and enabling features ###
 
 #### Convenience API ####
 
     var wii = require( 'nodewii' );
 
+    wii.mote( '00:00:00:00:00', function( err, wiimote ) {
+
+      this.rumble( true );
+
+      this.led( 1, true );
+      this.led( 3, true );
+
+      this.led( 3, false );
+
+    });
+
 #### Raw API ####
 
-    var git = require( 'nodegit' ).raw;
-    
-    // Create instance of Repo constructor
-    var repo = new git.Repo();
+    var wii = require( 'nodewii' ).raw;
 
-    // Read a repository
-    repo.open( '.git', function( err ) {
-        // Err is an integer, success is 0, use strError for string representation
-        if( err ) {
-            var error = new git.Error();
-            throw error.strError( err );
-        }
+    var wiimote = new wii.WiiMote();
 
-        // Create instance of Ref constructor with this repository
-        var ref = new git.Ref( repo );
-        
-        // Find the master branch
-        repo.lookupRef( ref, '/refs/heads/master', function( err ) {
-            if( err ) {
-              var error = new git.Error();
-              throw error.strError( err );
-            }
+    wiimote.connect( '00:00:00:00:00', function( err ) {
 
-            // Create instance of Commit constructor with this repository
-            var commit = new git.Commit( repo ),
-                // Create instance of Oid constructor
-                oid = new git.Oid();
+      wiimote.rumble( true );
 
-            // Set the oid constructor internal reference to this branch reference
-            ref.oid( oid );
+      wiimote.led( 1, true );
+      wiimote.led( 3, true );
 
-            // Lookup the commit for this oid
-            commit.lookup( oid, function() {
-                if( err ) {
-                  var error = new git.Error();
-                  throw error.strError( err );
-                }
+      wiimote.led( 3, false );
 
-                // Create instance of RevWalk constructor with this repository
-                var revwalk = new git.RevWalk( repo );
-
-                // Push the commit as the start to walk
-                revwalk.push( commit );
-
-                // Recursive walk
-                function walk() {
-                    // Each revision walk iteration yields a commit
-                    var revisionCommit = new git.Commit( repo );
-
-                    revwalk.next( revisionCommit, function( err ) {
-                        // Finish recursion once no more revision commits are left
-                        if( err ) { return; }
-
-                        // Create instance of Oid for sha
-                        var oid = new git.Oid();
-
-                        // Set oid to the revision commit
-                        revisionCommit.id( oid );
-
-                        // Create instance of Sig for author
-                        var author = new git.Sig();
-
-                        // Set the author to the revision commit author
-                        revisionCommit.author( author );
-
-                        // Convert timestamp to milliseconds and set new Date object
-                        var time = new Date( revisionCommit.time() * 1000 );
-
-                        // Print out `git log` emulation
-                        console.log( oid.toString( 40 ) );
-                        console.log( author.name() + '<' + author.email() + '>' );
-                        console.log( time );
-                        console.log( '\n' );
-                        console.log( revisionCommit.message() );
-                        console.log( '\n' );
-
-                        // Recurse!
-                        walk();
-                    });
-                }
-
-                // Initiate recursion
-                walk():
-            });
-        });
     });
+    
+
 
 Running tests
 -------------
 
-__ `nodegit` library code is written adhering to a modified `JSHint`. Run these checks with `make lint` in the project root. __
+__ `nodewii` library code is written adhering to a modified `JSHint`. Run these checks with `make lint` in the project root. __
 
 __ To run unit tests ensure the submodules `nodeunit` and `rimraf` are located in the `vendor/` subdirectory. __
 
-If they are not, `cd` into the `nodegit` dir and run the following `git` commands to automatically fetch them:
-    $ cd nodegit
+If they are not, `cd` into the `nodewii` dir and run the following `git` commands to automatically fetch them:
+    $ cd nodewii
     $ git submodule init vendor/
     $ git submodule update vendor/
 
@@ -158,27 +99,8 @@ Then simply run `make unittest` in the project root.
 Release information
 -------------------
 
-__ Can keep track of current method coverage at: [http://bit.ly/tb_methods](http://bit.ly/tb_methods) __
-
-### v0.0.2: ###
-    * More methods implemented
-    * More unit tests
-    * More API development
-    * Tree and Blob support
-    * Updated libgit2 to version 0.8.0
-
 ### v0.0.1: ###
     * Some useful methods implemented
-    * Some unit tests
-    * Some documented source code
-    * Useable build/code quality check tools
-    * Node.js application that can be configured/built/installed via source and NPM
-    * An API that can be easily extended with convenience methods in JS
-    * An API that offers a familiar clean syntax that will make adoption and use much more likely
-    * Open for public testing
-    * GitHub landing page
-    * Repo, Oid, Commit, Error, Ref, and RevWalk support
-    * Built on libgit2 version 0.3.0
 
 Getting involved
 ----------------

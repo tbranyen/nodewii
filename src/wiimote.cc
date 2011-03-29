@@ -25,6 +25,7 @@ void WiiMote::Initialize (Handle<v8::Object> target) {
 
   ir_event = NODE_PSYMBOL("ir");
   acc_event = NODE_PSYMBOL("acc");
+  nunchuck_event = NODE_PSYMBOL("nunchuck");
   
   constructor_template = Persistent<FunctionTemplate>::New(t);
   constructor_template->InstanceTemplate()->SetInternalFieldCount(1);
@@ -34,6 +35,8 @@ void WiiMote::Initialize (Handle<v8::Object> target) {
   NODE_SET_PROTOTYPE_METHOD(constructor_template, "rumble", Rumble);
   NODE_SET_PROTOTYPE_METHOD(constructor_template, "led", Led);
   NODE_SET_PROTOTYPE_METHOD(constructor_template, "ir", IrReporting);
+  NODE_SET_PROTOTYPE_METHOD(constructor_template, "acc", AccReporting);
+  NODE_SET_PROTOTYPE_METHOD(constructor_template, "ext", ExtReporting);
 
   target->Set(String::NewSymbol("WiiMote"), constructor_template->GetFunction());
 }
@@ -75,14 +78,7 @@ int WiiMote::Led(int index, bool on) {
 }
 
 int WiiMote::WatchMessages() {
-  //this->Ref();
-  //cwiid_set_data(this->wiimote, this);
-
-  //if(cwiid_set_mesg_callback(this->wiimote, MsgCallback)) {
-  //  return -1;
-  //}
-
-  ev_timer_init(&this->msg_timer, TriggerMessages, 0., 1.);
+  ev_timer_init(&this->msg_timer, TriggerMessages, 0., 0.5);
   this->msg_timer.data=this;
 
   ev_timer_start(&this->msg_timer);
@@ -94,6 +90,26 @@ int WiiMote::IrReporting(bool on) {
   int mode = this->state.rpt_mode;
 
   mode = on ? mode | CWIID_RPT_IR : mode & CWIID_RPT_IR;
+
+  if(cwiid_set_rpt_mode(this->wiimote, mode)) {
+    return -1;
+  }
+}
+
+int WiiMote::AccReporting(bool on) {
+  int mode = this->state.rpt_mode;
+
+  mode = on ? mode | CWIID_RPT_ACC : mode & CWIID_RPT_ACC;
+
+  if(cwiid_set_rpt_mode(this->wiimote, mode)) {
+    return -1;
+  }
+}
+
+int WiiMote::ExtReporting(bool on) {
+  int mode = this->state.rpt_mode;
+
+  mode = on ? mode | CWIID_RPT_EXT : mode & CWIID_RPT_EXT;
 
   if(cwiid_set_rpt_mode(this->wiimote, mode)) {
     return -1;
@@ -112,6 +128,7 @@ void WiiMote::TriggerMessages(EV_P_ ev_timer *watcher, int revents) {
     wiimote->Emit(ir_event, 1, argv);
   }
 
+  // Check IR data sources
   bool valid = false;
 	for(int i=0; i < CWIID_IR_SRC_COUNT; i++) {
     valid = true;
@@ -131,8 +148,64 @@ void WiiMote::TriggerMessages(EV_P_ ev_timer *watcher, int revents) {
     wiimote->Emit(ir_event, 1, argv);
   }
 
+  // Check Accelerometer data sources
+  //valid = false;
+	//for(int i=0; i < CWIID_ACC_SRC_COUNT; i++) {
+  //  valid = true;
+  //  argv[0] = Integer::New(0);
+
+  //  // Create array of x,y,z
+  //  Local<Array> pos = Array::New(2);
+  //  pos->Set(Number::New(0), Integer::New(wiimote->state.ir_src[i].pos[CWIID_X]));
+  //  pos->Set(Number::New(1), Integer::New(wiimote->state.ir_src[i].pos[CWIID_Y]));
+
+  //  argv[1] = pos;
+  //  wiimote->Emit(ir_event, 2, argv);
+  //}
+
+  //if(!valid) {
+  //  argv[0] = Integer::New(-1);
+  //  wiimote->Emit(ir_event, 1, argv);
+  //}
+
+  // Check Extension data sources
+  valid = false;
+  switch(state->ext_type) {
+    case CWIID_EXT_NONE:
+      argv[0] = Integer::New(-1);
+      wiimote->Emit(ext_event, 1, argv);
+      break;
+
+    case CWIID_EXT_NUNCHUCK:
+      argv[0] = Integer::New( 0 );
+
+      Local<Array> pos = Array::New(2);
+      pos->Set(Number::New(0), Integer::New(wiimote->state.ext.nunchuck[CWIID_X]));
+      pos->Set(Number::New(1), Integer::New(wiimote->state.ext.nunchuck[CWIID_Y]));
+      
+
+
+  }
+	for(int i=0; i < CWIID_ACC_SRC_COUNT; i++) {
+    valid = true;
+    argv[0] = Integer::New(0);
+
+    // Create array of x,y,z
+    Local<Array> pos = Array::New(2);
+    pos->Set(Number::New(0), Integer::New(wiimote->state.ir_src[i].pos[CWIID_X]));
+    pos->Set(Number::New(1), Integer::New(wiimote->state.ir_src[i].pos[CWIID_Y]));
+
+    argv[1] = pos;
+    wiimote->Emit(ir_event, 2, argv);
+  }
+
+  if(!valid) {
+    argv[0] = Integer::New(-1);
+    wiimote->Emit(ir_event, 1, argv);
+  }
+
   ev_timer_stop(&wiimote->msg_timer);
-  ev_timer_set(&wiimote->msg_timer, 0., 1.);
+  ev_timer_set(&wiimote->msg_timer, 0., 0.5);
   ev_timer_start(&wiimote->msg_timer);
 
   if(wiimote->msg_timer.repeat == 0) {
@@ -141,15 +214,6 @@ void WiiMote::TriggerMessages(EV_P_ ev_timer *watcher, int revents) {
     wiimote->Unref();
   }
 }
-
-//void WiiMote::MsgCallback(cwiid_wiimote_t* _wiimote, int msg_count, union cwiid_mesg msg[], struct timespec *timestamp) {
-//  printf("%s", "hit");
-//  WiiMote* wiimote = (WiiMote*)cwiid_get_data(_wiimote);
-//
-//  HandleScope scope;
-//
-//
-//}
 
 Handle<Value> WiiMote::New(const Arguments& args) {
   HandleScope scope;
@@ -277,6 +341,35 @@ Handle<Value> WiiMote::IrReporting(const Arguments& args) {
   return Integer::New(wiimote->IrReporting(on));
 }
 
+Handle<Value> WiiMote::AccReporting(const Arguments& args) {
+  HandleScope scope;
+
+  WiiMote* wiimote = ObjectWrap::Unwrap<WiiMote>(args.This());
+
+  if(args.Length() == 0 || !args[0]->IsBoolean()) {
+    return ThrowException(Exception::Error(String::New("On state is required and must be a Boolean.")));
+  }
+
+  bool on = args[0]->ToBoolean()->Value();
+
+  return Integer::New(wiimote->AccReporting(on));
+}
+
+Handle<Value> WiiMote::ExtReporting(const Arguments& args) {
+  HandleScope scope;
+
+  WiiMote* wiimote = ObjectWrap::Unwrap<WiiMote>(args.This());
+
+  if(args.Length() == 0 || !args[0]->IsBoolean()) {
+    return ThrowException(Exception::Error(String::New("On state is required and must be a Boolean.")));
+  }
+
+  bool on = args[0]->ToBoolean()->Value();
+
+  return Integer::New(wiimote->ExtReporting(on));
+}
+
 Persistent<FunctionTemplate> WiiMote::constructor_template;
 Persistent<String> WiiMote::ir_event;
 Persistent<String> WiiMote::acc_event;
+Persistent<String> WiiMote::nunchuck_event;

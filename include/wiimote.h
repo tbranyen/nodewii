@@ -32,6 +32,11 @@ class WiiMote : public EventEmitter {
      */
     static v8::Persistent<v8::String> acc_event;
     /**
+     * Variable: nunchuck_event
+     *   Used to dispatch nunchuck extension event.
+     */
+    static v8::Persistent<v8::String> nunchuck_event;
+    /**
      * Variable: constructor_template
      *   Used to create Node.js constructor.
      */
@@ -55,6 +60,8 @@ class WiiMote : public EventEmitter {
     int Rumble(bool on);
     int Led(int index, bool on);
     int IrReporting(bool on);
+    int AccReporting(bool on);
+    int ExtReporting(bool on);
     int WatchMessages();
 
   protected:
@@ -95,6 +102,8 @@ class WiiMote : public EventEmitter {
     static v8::Handle<v8::Value> Rumble(const v8::Arguments& args);
     static v8::Handle<v8::Value> Led(const v8::Arguments& args);
     static v8::Handle<v8::Value> IrReporting(const v8::Arguments& args);
+    static v8::Handle<v8::Value> AccReporting(const v8::Arguments& args);
+    static v8::Handle<v8::Value> ExtReporting(const v8::Arguments& args);
   private:
     /**
      * Variable: wiimote

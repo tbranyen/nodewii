@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+    <title>Test</title>
+
+    <style>
+      html, body {
+        width: 100%;
+        height: 100%;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+        background-color: #111111;
+        background-size: 50px;
+
+        padding: 0;
+        margin: 0;
+      }
+
+      .game {
+        overflow: hidden;
+        display: inline-block;
+        width: 500px;
+        height: 500px;
+        border-radius: 500px;
+        border-width: 3px solid #333;
+        box-shadow: 0px 0px 1000px #BBB;
+        background: url(http://farm6.static.flickr.com/5020/5414373456_f03fd41a6c_b.jpg);
+        background-attachment:fixed;
+        background-position: 0px 0px;
+        background-size: 100% 100%;
+        position: absolute;
+      }
+
+      .crosshair {
+        position: absolute;
+        width: 500px; height: 500px;
+        background-color: #333333;
+        z-index: 1;
+        border-radius: 500px;
+        opacity: .5;
+      }
+
+        .crosshair .lines {
+          position: relative;
+          top: 0; left: 0;
+          width: 500px; height: 500px;
+        }
+
+          .crosshair .lines .vertical {
+            position: absolute;
+            top: 0; bottom: 0; left: 50%;
+            margin-left: -1px;
+            width: 1px;
+            background-color: #CCCCCC;
+            opacity: .5;
+          }
+
+          .crosshair .lines .horizontal {
+            position: absolute;
+            top: 50%; left: 0; right: 0;
+            margin-top: -1px;
+            height: 1px;
+            background-color: #CCCCCC;
+            opacity: .5;
+          }
+
+      .overlay {
+        position: absolute;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+      }
+      
+    </style>
+  </head>
+
+  <body>
+    <div class="game">
+      <div class="crosshair">
+        <div class="lines">
+          <div class="vertical"></div>
+          <div class="horizontal"></div>
+        </div>
+      </div>
+      <div class="overlay"> </div>
+    </div>
+
+
+    <audio type="audio/mp3" autoplay src="audio/gun.mp3">
+
+
+    <script src="js/jquery.js"></script>
+    <script src="js/jquery.ba-tinypubsub.min.js"></script>
+    <script>
+      //jQuery( function( $ ) {
+      (function() {
+
+        // DoM CaChE
+        //var select = $( '#repo' ),
+        //    slider = $( '#revisions' ),
+        //    revision = $( '.revision' ),
+        //    message = $( '.message' ),
+        //    author = $( '.author' ),
+        //    date = $( '.date' ),
+        //    header = $( 'h1' );
+        var body = $( 'body' ), 
+            crosshair = $( '.game' );
+
+        // SeSsIoN cAcHe
+        var me = { revisions: [] };
+
+        function sound( effect ) {
+          console.log( document.querySelector('audio') );//.play();
+        }
+
+        $(window).bind( 'mousemove', function( evt ) {
+          crosshair.css( { 'left': (evt.clientX-250) + 'px', 'top': (evt.clientY-250) + 'px' } );
+        })
+        
+        crosshair.bind( 'click', function( evt ) {
+          body.css( 'background-color', '#FE432E' )
+
+          sound( 'gun' );
+
+          window.setTimeout( function() {
+            body.css( 'background-color', '#111' );
+          }, 50);
+        });
+
+
+        // SOCKET FUN
+        var socket = new io.Socket( '0.0.0.0', { port: 8888 } );
+        socket.connect();
+
+        function send( name, args ) {
+          args.method = name;
+          socket.send( args );
+        }
+
+        socket.on( 'connect', function() {
+          console.log( 'succesfully connected' );
+        });
+
+        socket.on( 'message', function( e ) {
+          $.publish( e.method, e );
+        });
+
+        socket.on( 'disconnect', function() {
+
+        });
+
+        // UI METHODS
+        $.subscribe( 'ui/refresh', function( e ) {
+          crosshair.css( { 'left': e.x + 'px', 'top': e.y + 'px' } );
+        });
+
+        // RECEIVE
+        $.subscribe( 'uuid', function( e ) {
+          me.uuid = e.uuid;
+        });
+
+        $.subscribe( 'ir', function( e ) {
+          $.publish( 'ui/refresh', { x: e.data[0], y: e.data[1] } );
+        });
+
+      })();
+    </script>
+  </body>
+</html>

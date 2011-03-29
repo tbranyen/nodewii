@@ -25,7 +25,7 @@ void WiiMote::Initialize (Handle<v8::Object> target) {
 
   ir_event = NODE_PSYMBOL("ir");
   acc_event = NODE_PSYMBOL("acc");
-  nunchuck_event = NODE_PSYMBOL("nunchuck");
+  nunchuk_event = NODE_PSYMBOL("nunchuk");
   
   constructor_template = Persistent<FunctionTemplate>::New(t);
   constructor_template->InstanceTemplate()->SetInternalFieldCount(1);
@@ -78,7 +78,7 @@ int WiiMote::Led(int index, bool on) {
 }
 
 int WiiMote::WatchMessages() {
-  ev_timer_init(&this->msg_timer, TriggerMessages, 0., 0.5);
+  ev_timer_init(&this->msg_timer, TriggerMessages, .4, .1);
   this->msg_timer.data=this;
 
   ev_timer_start(&this->msg_timer);
@@ -170,42 +170,25 @@ void WiiMote::TriggerMessages(EV_P_ ev_timer *watcher, int revents) {
 
   // Check Extension data sources
   valid = false;
-  switch(state->ext_type) {
+  switch(wiimote->state.ext_type) {
     case CWIID_EXT_NONE:
       argv[0] = Integer::New(-1);
-      wiimote->Emit(ext_event, 1, argv);
+      wiimote->Emit(nunchuk_event, 1, argv);
       break;
 
-    case CWIID_EXT_NUNCHUCK:
+    case CWIID_EXT_NUNCHUK:
       argv[0] = Integer::New( 0 );
 
       Local<Array> pos = Array::New(2);
-      pos->Set(Number::New(0), Integer::New(wiimote->state.ext.nunchuck[CWIID_X]));
-      pos->Set(Number::New(1), Integer::New(wiimote->state.ext.nunchuck[CWIID_Y]));
-      
+      pos->Set(Number::New(0), Integer::New(wiimote->state.ext.nunchuk.stick[CWIID_X]));
+      pos->Set(Number::New(1), Integer::New(wiimote->state.ext.nunchuk.stick[CWIID_Y]));
 
-
-  }
-	for(int i=0; i < CWIID_ACC_SRC_COUNT; i++) {
-    valid = true;
-    argv[0] = Integer::New(0);
-
-    // Create array of x,y,z
-    Local<Array> pos = Array::New(2);
-    pos->Set(Number::New(0), Integer::New(wiimote->state.ir_src[i].pos[CWIID_X]));
-    pos->Set(Number::New(1), Integer::New(wiimote->state.ir_src[i].pos[CWIID_Y]));
-
-    argv[1] = pos;
-    wiimote->Emit(ir_event, 2, argv);
-  }
-
-  if(!valid) {
-    argv[0] = Integer::New(-1);
-    wiimote->Emit(ir_event, 1, argv);
+      argv[1] = pos;
+      wiimote->Emit(nunchuk_event, 2, argv);
   }
 
   ev_timer_stop(&wiimote->msg_timer);
-  ev_timer_set(&wiimote->msg_timer, 0., 0.5);
+  ev_timer_set(&wiimote->msg_timer, .4, 0.1);
   ev_timer_start(&wiimote->msg_timer);
 
   if(wiimote->msg_timer.repeat == 0) {
@@ -372,4 +355,4 @@ Handle<Value> WiiMote::ExtReporting(const Arguments& args) {
 Persistent<FunctionTemplate> WiiMote::constructor_template;
 Persistent<String> WiiMote::ir_event;
 Persistent<String> WiiMote::acc_event;
-Persistent<String> WiiMote::nunchuck_event;
+Persistent<String> WiiMote::nunchuk_event;

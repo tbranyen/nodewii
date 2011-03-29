@@ -88,10 +88,7 @@
       <div class="overlay"> </div>
     </div>
 
-
-    <audio type="audio/mp3" autoplay src="audio/gun.mp3">
-
-
+    <script src="http://127.0.0.1:8888/socket.io/socket.io.js"></script>
     <script src="js/jquery.js"></script>
     <script src="js/jquery.ba-tinypubsub.min.js"></script>
     <script>
@@ -112,10 +109,6 @@
         // SeSsIoN cAcHe
         var me = { revisions: [] };
 
-        function sound( effect ) {
-          console.log( document.querySelector('audio') );//.play();
-        }
-
         $(window).bind( 'mousemove', function( evt ) {
           crosshair.css( { 'left': (evt.clientX-250) + 'px', 'top': (evt.clientY-250) + 'px' } );
         })
@@ -123,13 +116,12 @@
         crosshair.bind( 'click', function( evt ) {
           body.css( 'background-color', '#FE432E' )
 
-          sound( 'gun' );
+          play( 'silencer' );
 
           window.setTimeout( function() {
             body.css( 'background-color', '#111' );
           }, 50);
         });
-
 
         // SOCKET FUN
         var socket = new io.Socket( '0.0.0.0', { port: 8888 } );
@@ -138,6 +130,13 @@
         function send( name, args ) {
           args.method = name;
           socket.send( args );
+        }
+
+        function play( name ) {
+          var audio = document.createElement('audio');
+          audio.setAttribute( 'type', 'audio/mp3' );
+          audio.setAttribute( 'src', 'audio/' + name + '.mp3' );
+          audio.play();
         }
 
         socket.on( 'connect', function() {
@@ -163,6 +162,10 @@
         });
 
         $.subscribe( 'ir', function( e ) {
+          $.publish( 'ui/refresh', { x: e.data[0], y: e.data[1] } );
+        });
+
+        $.subscribe( 'nunchuk', function( e ) {
           $.publish( 'ui/refresh', { x: e.data[0], y: e.data[1] } );
         });
 

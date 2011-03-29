@@ -29,7 +29,6 @@ var clients = {
 
 function sendAll( name, args ) {
   args.method = name;
-  //console.log( clients.all() );
 
   clients.all().forEach(function( e ) {
     clients[e].socket.send( args );
@@ -79,6 +78,7 @@ wiimote.connect( '00:17:AB:39:42:B1', function( err ) {
       //data[0] = ( data[0] * -1 ) + 500;
 
       //data[1] = (data[1]+prev[1]) / 2;
+      console.log( data );
       sendAll( 'ir', { data: data } );
       bit += 1;
     }
@@ -86,6 +86,13 @@ wiimote.connect( '00:17:AB:39:42:B1', function( err ) {
       bit = 0;
     }
   });
+
+  //wiimote.ext( true );
+  //wiimote.on( 'nunchuk', function( err, data ) {
+  //  if( err ) { return; }
+
+  //  sendAll( 'nunchuk', { data: data } );
+  //});
 
   wiimote.on( 'accelerometer', function( err, data ) {
     console.log( data );

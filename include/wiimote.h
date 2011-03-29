@@ -32,10 +32,10 @@ class WiiMote : public EventEmitter {
      */
     static v8::Persistent<v8::String> acc_event;
     /**
-     * Variable: nunchuck_event
-     *   Used to dispatch nunchuck extension event.
+     * Variable: nunchuk_event
+     *   Used to dispatch nunchuk extension event.
      */
-    static v8::Persistent<v8::String> nunchuck_event;
+    static v8::Persistent<v8::String> nunchuk_event;
     /**
      * Variable: constructor_template
      *   Used to create Node.js constructor.

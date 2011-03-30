@@ -37,6 +37,11 @@ class WiiMote : public EventEmitter {
      */
     static v8::Persistent<v8::String> nunchuk_event;
     /**
+     * Variable: button_event
+     *   Used to dispatch button event.
+     */
+    static v8::Persistent<v8::String> button_event;
+    /**
      * Variable: constructor_template
      *   Used to create Node.js constructor.
      */
@@ -62,6 +67,7 @@ class WiiMote : public EventEmitter {
     int IrReporting(bool on);
     int AccReporting(bool on);
     int ExtReporting(bool on);
+    int ButtonReporting(bool on);
     int WatchMessages();
 
   protected:
@@ -96,7 +102,6 @@ class WiiMote : public EventEmitter {
     static int EIO_Connect(eio_req* req);
     static int EIO_AfterConnect(eio_req* req);
 
-    //static void MsgCallback(cwiid_wiimote_t* wiimote, int msg_count, union cwiid_mesg msg[], struct timespec *timestamp);
     static void TriggerMessages(EV_P_ ev_timer *watcher, int revents);
 
     static v8::Handle<v8::Value> Rumble(const v8::Arguments& args);
@@ -104,6 +109,7 @@ class WiiMote : public EventEmitter {
     static v8::Handle<v8::Value> IrReporting(const v8::Arguments& args);
     static v8::Handle<v8::Value> AccReporting(const v8::Arguments& args);
     static v8::Handle<v8::Value> ExtReporting(const v8::Arguments& args);
+    static v8::Handle<v8::Value> ButtonReporting(const v8::Arguments& args);
   private:
     /**
      * Variable: wiimote
@@ -125,6 +131,11 @@ class WiiMote : public EventEmitter {
      *   libev timer struct
      */
     ev_timer msg_timer;
+    /**
+     * Variable: button
+     *   button identifier
+     */
+    int button;
 
     struct connect_request {
       WiiMote* wiimote;
@@ -132,7 +143,6 @@ class WiiMote : public EventEmitter {
       int err;
       v8::Persistent<v8::Function> callback;
     };
-
 };
 
 #endif

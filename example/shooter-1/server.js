@@ -1,4 +1,4 @@
-var wii = require( '../build/default/nodewii.node' ),
+var wii = require( '../../build/default/nodewii.node' ),
     app = require( 'express' ).createServer(),
     io = require( 'socket.io' ),
     wiimote = new wii.WiiMote();
@@ -61,11 +61,15 @@ wiimote.connect( '00:17:AB:39:42:B1', function( err ) {
 
   //}, 50);
 
-
-  wiimote.ir( true );
+  wiimote.button( true );
+  wiimote.on( 'button', function( err, data ) {
+    sendAll( 'button', { data: data } );
+  });
   
   // Wait for infrared data
   var bit = 0, prev = [];
+
+  wiimote.ir( true );
   wiimote.on( 'ir', function( err, data ) {
 
     if(data[0] !== 0 && data[1] !== 0 && bit < 1) {
@@ -78,8 +82,10 @@ wiimote.connect( '00:17:AB:39:42:B1', function( err ) {
       //data[0] = ( data[0] * -1 ) + 500;
 
       //data[1] = (data[1]+prev[1]) / 2;
-      console.log( data );
-      sendAll( 'ir', { data: data } );
+      prev[0] = prev[0] * -1;
+      prev[1] = prev[1];
+
+      sendAll( 'ir', { data: prev } );
       bit += 1;
     }
     else {

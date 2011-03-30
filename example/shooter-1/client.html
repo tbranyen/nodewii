@@ -23,12 +23,12 @@
       .game {
         overflow: hidden;
         display: inline-block;
-        width: 500px;
-        height: 500px;
-        border-radius: 500px;
+        width: 200px;
+        height: 200px;
+        border-radius: 200px;
         border-width: 3px solid #333;
         box-shadow: 0px 0px 1000px #BBB;
-        background: url(http://farm6.static.flickr.com/5020/5414373456_f03fd41a6c_b.jpg);
+        background: url(img/test.jpg);
         background-attachment:fixed;
         background-position: 0px 0px;
         background-size: 100% 100%;
@@ -37,7 +37,7 @@
 
       .crosshair {
         position: absolute;
-        width: 500px; height: 500px;
+        width: 200px; height: 200px;
         background-color: #333333;
         z-index: 1;
         border-radius: 500px;
@@ -47,7 +47,7 @@
         .crosshair .lines {
           position: relative;
           top: 0; left: 0;
-          width: 500px; height: 500px;
+          width: 200px; height: 200px;
         }
 
           .crosshair .lines .vertical {
@@ -91,19 +91,11 @@
     <script src="http://127.0.0.1:8888/socket.io/socket.io.js"></script>
     <script src="js/jquery.js"></script>
     <script src="js/jquery.ba-tinypubsub.min.js"></script>
-    <script src="http://127.0.0.1:8888/socket.io/socket.js"></script>
     <script>
       //jQuery( function( $ ) {
       (function() {
 
         // DoM CaChE
-        //var select = $( '#repo' ),
-        //    slider = $( '#revisions' ),
-        //    revision = $( '.revision' ),
-        //    message = $( '.message' ),
-        //    author = $( '.author' ),
-        //    date = $( '.date' ),
-        //    header = $( 'h1' );
         var body = $( 'body' ), 
             crosshair = $( '.game' );
 
@@ -111,17 +103,11 @@
         var me = { revisions: [] };
 
         $(window).bind( 'mousemove', function( evt ) {
-          crosshair.css( { 'left': (evt.clientX-250) + 'px', 'top': (evt.clientY-250) + 'px' } );
+          crosshair.css( { 'left': (evt.clientX-100) + 'px', 'top': (evt.clientY-100) + 'px' } );
         })
         
         crosshair.bind( 'click', function( evt ) {
-          body.css( 'background-color', '#FE432E' )
-
-          play( 'silencer' );
-
-          window.setTimeout( function() {
-            body.css( 'background-color', '#111' );
-          }, 50);
+          $.publish( 'game/shot', { x: evt.clientX, y: evt.clientY } );
         });
 
         // SOCKET FUN
@@ -152,6 +138,18 @@
 
         });
 
+        // GAME METHODS
+        $.subscribe( 'game/shot', function( e ) {
+          body.css( 'background-color', '#FE432E' )
+
+          play( 'silencer' );
+          console.log( e.x, e.y );
+
+          window.setTimeout( function() {
+            body.css( 'background-color', '#111' );
+          }, 50);
+        });
+
         // UI METHODS
         $.subscribe( 'ui/refresh', function( e ) {
           crosshair.css( { 'left': e.x + 'px', 'top': e.y + 'px' } );
@@ -168,6 +166,17 @@
 
         $.subscribe( 'nunchuk', function( e ) {
           $.publish( 'ui/refresh', { x: e.data[0], y: e.data[1] } );
+        });
+
+        $.subscribe( 'button', function( e ) {
+          var pos = {
+            x: crosshair.position().top + ( crosshair.height() / 2 ),
+            y: crosshair.position().left + ( crosshair.width() /2 )
+          };
+
+          if( e.data === 4 ) {
+            $.publish( 'game/shot', pos );
+          }
         });
 
       })();

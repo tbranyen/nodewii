@@ -15,8 +15,6 @@
 using namespace v8;
 using namespace node;
 
-cwiid_mesg_callback_t MsgCallback;
-
 void WiiMote::Initialize (Handle<v8::Object> target) {
   HandleScope scope;
 
@@ -26,6 +24,7 @@ void WiiMote::Initialize (Handle<v8::Object> target) {
   ir_event = NODE_PSYMBOL("ir");
   acc_event = NODE_PSYMBOL("acc");
   nunchuk_event = NODE_PSYMBOL("nunchuk");
+  button_event = NODE_PSYMBOL("button");
   
   constructor_template = Persistent<FunctionTemplate>::New(t);
   constructor_template->InstanceTemplate()->SetInternalFieldCount(1);
@@ -37,6 +36,7 @@ void WiiMote::Initialize (Handle<v8::Object> target) {
   NODE_SET_PROTOTYPE_METHOD(constructor_template, "ir", IrReporting);
   NODE_SET_PROTOTYPE_METHOD(constructor_template, "acc", AccReporting);
   NODE_SET_PROTOTYPE_METHOD(constructor_template, "ext", ExtReporting);
+  NODE_SET_PROTOTYPE_METHOD(constructor_template, "button", ButtonReporting);
 
   target->Set(String::NewSymbol("WiiMote"), constructor_template->GetFunction());
 }
@@ -78,7 +78,7 @@ int WiiMote::Led(int index, bool on) {
 }
 
 int WiiMote::WatchMessages() {
-  ev_timer_init(&this->msg_timer, TriggerMessages, .4, .1);
+  ev_timer_init(&this->msg_timer, TriggerMessages, 1, .02);
   this->msg_timer.data=this;
 
   ev_timer_start(&this->msg_timer);
@@ -87,6 +87,9 @@ int WiiMote::WatchMessages() {
 }
 
 int WiiMote::IrReporting(bool on) {
+  if(cwiid_get_state(this->wiimote, &this->state)) {
+    return -1;
+  }
   int mode = this->state.rpt_mode;
 
   mode = on ? mode | CWIID_RPT_IR : mode & CWIID_RPT_IR;
@@ -94,6 +97,8 @@ int WiiMote::IrReporting(bool on) {
   if(cwiid_set_rpt_mode(this->wiimote, mode)) {
     return -1;
   }
+
+  return 0;
 }
 
 int WiiMote::AccReporting(bool on) {
@@ -104,6 +109,8 @@ int WiiMote::AccReporting(bool on) {
   if(cwiid_set_rpt_mode(this->wiimote, mode)) {
     return -1;
   }
+
+  return 0;
 }
 
 int WiiMote::ExtReporting(bool on) {
@@ -114,6 +121,23 @@ int WiiMote::ExtReporting(bool on) {
   if(cwiid_set_rpt_mode(this->wiimote, mode)) {
     return -1;
   }
+
+  return 0;
+}
+
+int WiiMote::ButtonReporting(bool on) {
+  if(cwiid_get_state(this->wiimote, &this->state)) {
+    return -1;
+  }
+  int mode = this->state.rpt_mode;
+
+  mode = on ? mode | CWIID_RPT_BTN : mode & CWIID_RPT_BTN;
+
+  if(cwiid_set_rpt_mode(this->wiimote, mode)) {
+    return -1;
+  }
+
+  return 0;
 }
 
 void WiiMote::TriggerMessages(EV_P_ ev_timer *watcher, int revents) {
@@ -187,12 +211,19 @@ void WiiMote::TriggerMessages(EV_P_ ev_timer *watcher, int revents) {
       wiimote->Emit(nunchuk_event, 2, argv);
   }
 
-  ev_timer_stop(&wiimote->msg_timer);
-  ev_timer_set(&wiimote->msg_timer, .4, 0.1);
-  ev_timer_start(&wiimote->msg_timer);
+  // Check buttons
+  if(wiimote->state.buttons > 0) {
+    wiimote->button = wiimote->state.buttons;
+  }
+  else if(wiimote->button) {
+    argv[0] = Integer::New(0);
+    argv[1] = Integer::New(wiimote->button);
+
+    wiimote->Emit(button_event, 2, argv);
+    wiimote->button = 0;
+  }
 
   if(wiimote->msg_timer.repeat == 0) {
-    printf("%s", "x2");
     ev_timer_stop(&wiimote->msg_timer);
     wiimote->Unref();
   }
@@ -352,7 +383,22 @@ Handle<Value> WiiMote::ExtReporting(const Arguments& args) {
   return Integer::New(wiimote->ExtReporting(on));
 }
 
+Handle<Value> WiiMote::ButtonReporting(const Arguments& args) {
+  HandleScope scope;
+
+  WiiMote* wiimote = ObjectWrap::Unwrap<WiiMote>(args.This());
+
+  if(args.Length() == 0 || !args[0]->IsBoolean()) {
+    return ThrowException(Exception::Error(String::New("On state is required and must be a Boolean.")));
+  }
+
+  bool on = args[0]->ToBoolean()->Value();
+
+  return Integer::New(wiimote->ButtonReporting(on));
+}
+
 Persistent<FunctionTemplate> WiiMote::constructor_template;
 Persistent<String> WiiMote::ir_event;
 Persistent<String> WiiMote::acc_event;
 Persistent<String> WiiMote::nunchuk_event;
+Persistent<String> WiiMote::button_event;

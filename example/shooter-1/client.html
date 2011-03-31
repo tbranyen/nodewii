@@ -68,16 +68,18 @@
             opacity: .5;
           }
 
-      .overlay {
-        position: absolute;
-        top: 0; left: 0;
-        width: 100%; height: 100%;
+      .target {
+        background-image: url(img/zombie.gif);
+        background-size: 150px 155px;
+        width: 150px;
+        height: 155px;
       }
       
     </style>
   </head>
 
   <body>
+    <div class="target"></div>
     <div class="game">
       <div class="crosshair">
         <div class="lines">
@@ -88,7 +90,7 @@
       <div class="overlay"> </div>
     </div>
 
-    <script src="http://127.0.0.1:8888/socket.io/socket.io.js"></script>
+    <script src="http://10.0.0.168:8888/socket.io/socket.io.js"></script>
     <script src="js/jquery.js"></script>
     <script src="js/jquery.ba-tinypubsub.min.js"></script>
     <script>
@@ -97,7 +99,8 @@
 
         // DoM CaChE
         var body = $( 'body' ), 
-            crosshair = $( '.game' );
+            crosshair = $( '.game' ),
+            target = $( '.target' );
 
         // SeSsIoN cAcHe
         var me = { revisions: [] };
@@ -111,7 +114,7 @@
         });
 
         // SOCKET FUN
-        var socket = new io.Socket( '0.0.0.0', { port: 8888 } );
+        var socket = new io.Socket( '10.0.0.168', { port: 8888 } );
         socket.connect();
 
         function send( name, args ) {
@@ -143,11 +146,16 @@
           body.css( 'background-color', '#FE432E' )
 
           play( 'silencer' );
-          console.log( e.x, e.y );
 
           window.setTimeout( function() {
             body.css( 'background-color', '#111' );
           }, 50);
+        });
+
+        $.subscribe( 'game/target', function( e ) {
+          var height = Math.random() * $(window).height();
+          //
+          animate
         });
 
         // UI METHODS
@@ -161,7 +169,7 @@
         });
 
         $.subscribe( 'ir', function( e ) {
-          $.publish( 'ui/refresh', { x: e.data[0], y: e.data[1] } );
+          $.publish( 'ui/refresh', { x: e.data[0]+ ($(window).width()/1.5), y: e.data[1]-100 } );
         });
 
         $.subscribe( 'nunchuk', function( e ) {

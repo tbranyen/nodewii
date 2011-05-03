@@ -4,7 +4,7 @@ import os
 from os import system
 from os.path import exists, abspath
 
-VERSION = '0.0.0'
+VERSION = '0.0.1'
 APPNAME = 'nodewii'
 srcdir = '.'
 blddir = 'build'

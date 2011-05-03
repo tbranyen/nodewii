@@ -63,6 +63,7 @@ wiimote.connect( '00:17:AB:39:42:B1', function( err ) {
 
   wiimote.button( true );
   wiimote.on( 'button', function( err, data ) {
+    console.log( data );
     sendAll( 'button', { data: data } );
   });
   

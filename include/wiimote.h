@@ -37,10 +37,15 @@ class WiiMote : public EventEmitter {
      */
     static v8::Persistent<v8::String> nunchuk_event;
     /**
-     * Variable: button_event
-     *   Used to dispatch button event.
+     * Variable: buttondown_event
+     *   Used to dispatch buttondown event.
      */
-    static v8::Persistent<v8::String> button_event;
+    static v8::Persistent<v8::String> buttondown_event;
+    /**
+     * Variable: buttonup_event
+     *   Used to dispatch buttonup event.
+     */
+    static v8::Persistent<v8::String> buttonup_event;
     /**
      * Variable: error_event
      *   Used to dispatch error event.

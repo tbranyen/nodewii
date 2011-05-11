@@ -24,8 +24,9 @@ void WiiMote::Initialize (Handle<v8::Object> target) {
   ir_event = NODE_PSYMBOL("ir");
   acc_event = NODE_PSYMBOL("acc");
   nunchuk_event = NODE_PSYMBOL("nunchuk");
-  button_event = NODE_PSYMBOL("button");
   error_event = NODE_PSYMBOL("error");
+  buttondown_event = NODE_PSYMBOL("buttondown");
+  buttonup_event = NODE_PSYMBOL("buttonup");
   
   constructor_template = Persistent<FunctionTemplate>::New(t);
   constructor_template->InstanceTemplate()->SetInternalFieldCount(1);
@@ -146,7 +147,7 @@ void WiiMote::TriggerMessages(EV_P_ ev_timer *watcher, int revents) {
 
   HandleScope scope;
 
-  Local<Value> argv[2];
+  Local<Value> argv[1];
 
   if(cwiid_get_state(wiimote->wiimote, &wiimote->state)) {
     argv[0] = Integer::New(-1);
@@ -157,15 +158,14 @@ void WiiMote::TriggerMessages(EV_P_ ev_timer *watcher, int revents) {
   bool valid = false;
 	for(int i=0; i < CWIID_IR_SRC_COUNT; i++) {
     valid = true;
-    argv[0] = Integer::New(0);
 
     // Create array of x,y
     Local<Array> pos = Array::New(2);
     pos->Set(Number::New(0), Integer::New(wiimote->state.ir_src[i].pos[CWIID_X]));
     pos->Set(Number::New(1), Integer::New(wiimote->state.ir_src[i].pos[CWIID_Y]));
 
-    argv[1] = pos;
-    wiimote->Emit(ir_event, 2, argv);
+    argv[0] = pos;
+    wiimote->Emit(ir_event, 1, argv);
   }
 
   if(!valid) {
@@ -215,12 +215,14 @@ void WiiMote::TriggerMessages(EV_P_ ev_timer *watcher, int revents) {
   // Check buttons
   if(wiimote->state.buttons > 0) {
     wiimote->button = wiimote->state.buttons;
+    argv[0] = Integer::New(wiimote->button);
+
+    wiimote->Emit(buttondown_event, 1, argv);
   }
   else if(wiimote->button) {
-    argv[0] = Integer::New(0);
-    argv[1] = Integer::New(wiimote->button);
+    argv[0] = Integer::New(wiimote->button);
 
-    wiimote->Emit(button_event, 2, argv);
+    wiimote->Emit(buttonup_event, 1, argv);
     wiimote->button = 0;
   }
 
@@ -402,5 +404,6 @@ Persistent<FunctionTemplate> WiiMote::constructor_template;
 Persistent<String> WiiMote::ir_event;
 Persistent<String> WiiMote::acc_event;
 Persistent<String> WiiMote::nunchuk_event;
-Persistent<String> WiiMote::button_event;
 Persistent<String> WiiMote::error_event;
+Persistent<String> WiiMote::buttondown_event;
+Persistent<String> WiiMote::buttonup_event;

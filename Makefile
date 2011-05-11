@@ -18,10 +18,8 @@ build_bindings:
 install:
 	@@mkdir -p $(INSTALL_PATH)
 	@@mkdir -p $(INSTALL_PATH)/build/default
-	@@mkdir -p $(INSTALL_PATH)/lib
 
 	@@cp -f $(BASE)/build/default/nodewii.node $(INSTALL_PATH)/build/default/nodewii.node
-	@@cp -f $(BASE)/lib/* $(INSTALL_PATH)/lib/
 	@@cp -f $(BASE)/package.json $(INSTALL_PATH)/
 
 	@@echo "Installed to $(INSTALL_PATH)"

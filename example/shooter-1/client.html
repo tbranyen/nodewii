@@ -102,7 +102,7 @@
       </div>
     </div>
 
-    <script src="http://10.0.0.106:8888/socket.io/socket.io.js"></script>
+    <script src="http://127.0.0.1:8888/socket.io/socket.io.js"></script>
     <script src="js/jquery.js"></script>
     <script src="js/jquery.ba-tinypubsub.min.js"></script>
     <script>
@@ -126,7 +126,7 @@
         });
 
         // SOCKET FUN
-        var socket = new io.Socket( '10.0.0.106', { port: 8888 } );
+        var socket = new io.Socket( '127.0.0.1', { port: 8888 } );
         socket.connect();
 
         function send( name, args ) {

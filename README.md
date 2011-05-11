@@ -53,21 +53,31 @@ API Example Usage
 
 #### Raw API ####
 
-    var wii = require( 'nodewii' ).raw;
+    var wii = require( 'nodewii' )
+      , wiimote = new wii.WiiMote();
 
-    var wiimote = new wii.WiiMote();
-
+    // You need to specify a mac address to your wiimote - this is unique per wiimote
     wiimote.connect( '00:00:00:00:00', function( err ) {
 
+      // Enable rumble
       wiimote.rumble( true );
 
+      // Turn on led's 1 and 3
       wiimote.led( 1, true );
       wiimote.led( 3, true );
 
+      // Turn off led 3
       wiimote.led( 3, false );
 
-    });
+      // Get IR Data
+      wiimote.ir( true );
+      wiimote.on( 'ir', function( data ) {
+        var x = data[0]
+          , y = data[1];
 
+        console.log( 'Position', x, y );
+      });
+    });
 
 Running tests
 -------------

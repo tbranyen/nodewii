@@ -79,11 +79,6 @@ API Example Usage
       });
     });
 
-Running tests
--------------
-
-__`nodewii` library code is written adhering to a modified `JSHint`. Run these checks with `make lint` in the project root.__
-
 Release information
 -------------------
 
@@ -94,6 +89,4 @@ Release information
 Getting involved
 ----------------
 
-If you find this project of interest, please document all issues and fork if you feel you can provide a patch.  Testing is of huge importance; by simply running the unit tests on your system and reporting issues you can contribute!
-
-__Before submitting a pull request, please ensure lint checks pass.__
+If you find this project of interest, please document all issues and fork if you feel you can provide a patch.  

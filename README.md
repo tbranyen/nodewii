@@ -14,6 +14,13 @@ To run `nodewii` you need `Node.js`, `bluez`, and `libcwiid` installed. To run u
 It is sufficient enough to rely on the system package manager to install libcwiid and bluez.  Refer to your distros repository search
 to find the correct module names and installation procedure.
 
+### In action ###
+`nodewii` was implemented at JSconf 2011 for Mary Rose Cook's game Pistol Slut.  You can see the pull request here for how it was implemented:
+
+[https://github.com/maryrosecook/pistolslut/pull/1](https://github.com/maryrosecook/pistolslut/pull/1)
+
+Video demo: [http://vimeo.com/23224874](http://vimeo.com/23224874)
+
 ### Easy install (Recommended) ###
 This will install and configure everything you need to use `nodewii`.
 

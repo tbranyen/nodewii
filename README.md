@@ -21,11 +21,6 @@ to find the correct module names and installation procedure.
 
 Video demo: [http://vimeo.com/23224874](http://vimeo.com/23224874)
 
-### Easy install (Recommended) ###
-This will install and configure everything you need to use `nodewii`.
-
-    $ sudo npm install nodewii
-
 ### Linux/Unix ###
 
 #### Install `nodewii` by cloning source from __GitHub__ and running the `configure`, `make`, and `make install` commands: ####

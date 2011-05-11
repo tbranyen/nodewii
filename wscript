@@ -22,8 +22,6 @@ def configure(conf):
   conf.check_tool('node_addon')
 
 def build(bld):
-  
-
   main = bld.new_task_gen('cxx', 'shlib', 'node_addon')
   main.target = 'nodewii'
   main.source = 'src/base.cc src/wiimote.cc'

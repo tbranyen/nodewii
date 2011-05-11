@@ -1,7 +1,7 @@
 {
   "name": "nodewii",
   "description": "Node.js libcwiid asynchronous native bindings",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "homepage": "https://github.com/tbranyen/nodewii",
   "author": "Tim Branyen <tim@tabdeveloper.com> (http://twitter.com/tbranyen)",
   "main": "./build/default/nodewii.node",

@@ -13,84 +13,96 @@
         text-align: center;
         position: relative;
         overflow: hidden;
-        background-color: #111111;
+        background-color: #111;
         background-size: 50px;
 
         padding: 0;
         margin: 0;
       }
 
-      .game {
-        overflow: hidden;
-        display: inline-block;
-        width: 200px;
-        height: 200px;
-        border-radius: 200px;
-        border-width: 3px solid #333;
-        box-shadow: 0px 0px 1000px #BBB;
-        background: url(img/test.jpg);
-        background-attachment:fixed;
-        background-position: 0px 0px;
-        background-size: 100% 100%;
+      .wrapper {
+        width: 100%;
+        height: 100%;
         position: absolute;
+        z-index: 10;
+        background-color: transparent;
       }
-
-      .crosshair {
-        position: absolute;
-        width: 200px; height: 200px;
-        background-color: #333333;
-        z-index: 1;
-        border-radius: 500px;
-        opacity: .5;
-      }
-
-        .crosshair .lines {
-          position: relative;
-          top: 0; left: 0;
-          width: 200px; height: 200px;
+        .game {
+          overflow: hidden;
+          display: inline-block;
+          width: 400px;
+          height: 400px;
+          border-radius: 400px;
+          border-width: 3px solid #333;
+          box-shadow: 0px 0px 1000px #BBB;
+          background: rgba(255, 0, 0, 0);
+          /*background-attachment: fixed;*/
+          background-position: 0px 0px;
+          background-size: 100% 100%;
+          position: absolute;
+          z-index: 20;
         }
 
-          .crosshair .lines .vertical {
-            position: absolute;
-            top: 0; bottom: 0; left: 50%;
-            margin-left: -1px;
-            width: 1px;
-            background-color: #CCCCCC;
-            opacity: .5;
+        .crosshair {
+          position: absolute;
+          width: 400px; height: 400px;
+          background-color: #333333;
+          z-index: 1;
+          border-radius: 500px;
+          opacity: .5;
+        }
+
+          .crosshair .lines {
+            position: relative;
+            top: 0; left: 0;
+            width: 400px; height: 400px;
           }
 
-          .crosshair .lines .horizontal {
-            position: absolute;
-            top: 50%; left: 0; right: 0;
-            margin-top: -1px;
-            height: 1px;
-            background-color: #CCCCCC;
-            opacity: .5;
-          }
+            .crosshair .lines .vertical {
+              position: absolute;
+              top: 0; bottom: 0; left: 50%;
+              margin-left: -1px;
+              width: 1px;
+              background-color: #CCCCCC;
+              opacity: .5;
+            }
 
-      .target {
-        background-image: url(img/zombie.gif);
-        background-size: 150px 155px;
-        width: 150px;
-        height: 155px;
-      }
+            .crosshair .lines .horizontal {
+              position: absolute;
+              top: 50%; left: 0; right: 0;
+              margin-top: -1px;
+              height: 1px;
+              background-color: #CCCCCC;
+              opacity: .5;
+            }
+
+        .target {
+          background-image: url(img/zombie.gif);
+          background-size: 150px 155px;
+          width: 150px;
+          height: 155px;
+          position: fixed;
+          top: 0; left: 0;
+          z-index: 0;
+        }
       
     </style>
   </head>
 
   <body>
-    <div class="target"></div>
-    <div class="game">
-      <div class="crosshair">
-        <div class="lines">
-          <div class="vertical"></div>
-          <div class="horizontal"></div>
+    <div class="wrapper">
+      <div class="game">
+        <div class="crosshair">
+          <div class="lines">
+            <div class="vertical"></div>
+            <div class="horizontal"></div>
+          </div>
         </div>
+        <div class="target"></div>
       </div>
-      <div class="overlay"> </div>
     </div>
 
-    <script src="http://10.0.0.168:8888/socket.io/socket.io.js"></script>
+    <script src="http://10.0.0.106:8888/socket.io/socket.io.js"></script>
     <script src="js/jquery.js"></script>
     <script src="js/jquery.ba-tinypubsub.min.js"></script>
     <script>
@@ -106,7 +118,7 @@
         var me = { revisions: [] };
 
         $(window).bind( 'mousemove', function( evt ) {
-          crosshair.css( { 'left': (evt.clientX-100) + 'px', 'top': (evt.clientY-100) + 'px' } );
+          crosshair.css( { 'left': (evt.clientX-200) + 'px', 'top': (evt.clientY-200) + 'px' } );
         })
         
         crosshair.bind( 'click', function( evt ) {
@@ -114,7 +126,7 @@
         });
 
         // SOCKET FUN
-        var socket = new io.Socket( '10.0.0.168', { port: 8888 } );
+        var socket = new io.Socket( '10.0.0.106', { port: 8888 } );
         socket.connect();
 
         function send( name, args ) {
@@ -155,12 +167,16 @@
         $.subscribe( 'game/target', function( e ) {
           var height = Math.random() * $(window).height();
           //
-          animate
         });
 
         // UI METHODS
         $.subscribe( 'ui/refresh', function( e ) {
-          crosshair.css( { 'left': e.x + 'px', 'top': e.y + 'px' } );
+          var width = $(window).width()
+            , height = $(window).height()
+            , x = ( e.x * width ) / 1024
+            , y = ( e.y * height ) / 768;
+
+          crosshair.css( { 'left': (x-900) + 'px', 'top': y + 'px' } );
         });
 
         // RECEIVE

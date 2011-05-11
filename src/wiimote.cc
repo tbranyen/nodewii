@@ -25,6 +25,7 @@ void WiiMote::Initialize (Handle<v8::Object> target) {
   acc_event = NODE_PSYMBOL("acc");
   nunchuk_event = NODE_PSYMBOL("nunchuk");
   button_event = NODE_PSYMBOL("button");
+  error_event = NODE_PSYMBOL("error");
   
   constructor_template = Persistent<FunctionTemplate>::New(t);
   constructor_template->InstanceTemplate()->SetInternalFieldCount(1);
@@ -402,3 +403,4 @@ Persistent<String> WiiMote::ir_event;
 Persistent<String> WiiMote::acc_event;
 Persistent<String> WiiMote::nunchuk_event;
 Persistent<String> WiiMote::button_event;
+Persistent<String> WiiMote::error_event;

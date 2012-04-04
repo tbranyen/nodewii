@@ -31,8 +31,8 @@ Video demo: [http://vimeo.com/23224874](http://vimeo.com/23224874)
 Install `nodewii` by cloning source from __GitHub__ and running the
 `configure`, `make`, and `make install` commands:
 
-*Note: `nodewii` assumes your library path exists at `~/.node_libraries` you
-can change this by specifying a new path*
+Note: `nodewii` assumes your library path exists at `~/.node_libraries` you
+can change this by specifying a new path
     
 ``` bash
 $ git clone git://github.com/tbranyen/nodewii.git

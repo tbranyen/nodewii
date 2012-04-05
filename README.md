@@ -3,23 +3,23 @@ Node.js libcwiid bindings
 
 Created by Tim Branyen [@tbranyen](http://twitter.com/tbranyen)
 
-Currently under active development (and seeking contributors), `nodewii`
-provides asynchronous native bindings to the `libcwiid` C API.
+Currently under active development (and seeking contributors), nodewii
+provides asynchronous native bindings to the libcwiid C API.
 
 Building and installing
 -----------------------
 
 ### Dependencies ###
-To run `nodewii` you need `Node.js`, `bluez`, and `libcwiid` installed. To run
-unit tests you will need to have `git` installed and accessible from your
-`PATH` to fetch any `vendor/` addons. 
+To run nodewii you need Node.js, bluez, and libcwiid installed. To run
+unit tests you will need to have git installed and accessible from your
+PATH to fetch any vendor/ addons. 
 
 It is sufficient enough to rely on the system package manager to install
 libcwiid and bluez.  Refer to your distros repository search to find the
 correct module names and installation procedure.
 
 ### In action ###
-`nodewii` was implemented at JSconf 2011 for Mary Rose Cook's game Pistol Slut.
+nodewii was implemented at JSconf 2011 for Mary Rose Cook's game Pistol Slut.
 You can see the pull request here for how it was implemented:
 
 [https://github.com/maryrosecook/pistolslut/pull/1](https://github.com/maryrosecook/pistolslut/pull/1)
@@ -28,10 +28,10 @@ Video demo: [http://vimeo.com/23224874](http://vimeo.com/23224874)
 
 ### Linux/Unix ###
 
-Install `nodewii` by cloning source from __GitHub__ and running the
-`configure`, `make`, and `make install` commands:
+Install nodewii by cloning source from __GitHub__ and running the
+configure, make, and make install commands:
 
-Note: `nodewii` assumes your library path exists at `~/.node_libraries` you
+Note: nodewii assumes your library path exists at ~/.node_libraries you
 can change this by specifying a new path
     
 ``` bash
@@ -54,7 +54,7 @@ $ make update NODE_LIB_PATH=/path/to/your/libraries
 ```
 
 ### Apple OS X/Windows via Cygwin ###
-`nodewii` currently does not run on either Mac OS X or Windows machines.  This
+nodewii currently does not run on either Mac OS X or Windows machines.  This
 is a problem with `libcwiid`.  A future plan is to fork `libcwiid` and write
 support for at least Apple OS X.
 
